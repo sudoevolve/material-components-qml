@@ -7,6 +7,7 @@ Item {
     property real value: 0.0 // 0.0 to 1.0
     property bool indeterminate: false
     property bool showTrack: true
+    property bool wavy: false
     
     implicitWidth: 48
     implicitHeight: 48
@@ -17,6 +18,17 @@ Item {
     property real _rotation: 0
     property real _arcOffset: 0
     property real _arcSweep: 0
+    
+    // Wavy properties
+    property real _wavyPhase: 0
+    
+    NumberAnimation on _wavyPhase {
+        running: control.wavy && control.visible && control.indeterminate
+        from: 0
+        to: Math.PI * 2
+        duration: 2000
+        loops: Animation.Infinite
+    }
     
     onIndeterminateChanged: {
         if (!indeterminate) {
@@ -34,10 +46,12 @@ Item {
     
     onValueChanged: canvas.requestPaint()
     onShowTrackChanged: canvas.requestPaint()
+    onWavyChanged: canvas.requestPaint()
+    on_WavyPhaseChanged: canvas.requestPaint()
 
     // Indeterminate Animations
     ParallelAnimation {
-        running: control.indeterminate && control.visible
+        running: control.indeterminate && control.visible && !control.wavy
         loops: Animation.Infinite
         
         // Continuous body rotation
@@ -62,6 +76,17 @@ Item {
                 NumberAnimation { target: control; property: "_arcOffset"; from: 50; to: 360; duration: 1000; easing.type: Easing.InOutCubic }
             }
         }
+    }
+    
+    // Wavy Indeterminate Animation (Just rotation)
+    NumberAnimation {
+        target: control
+        property: "_rotation"
+        from: 0
+        to: 360
+        duration: 6000
+        loops: Animation.Infinite
+        running: control.indeterminate && control.visible && control.wavy
     }
 
     // Trigger paint on animation changes
@@ -90,41 +115,99 @@ Item {
             ctx.lineWidth = lineWidth;
             ctx.lineCap = "round";
             
-            // Draw Track (only for determinate)
-            if (!control.indeterminate && control.showTrack) {
-                ctx.beginPath();
-                ctx.strokeStyle = control._colors.surfaceContainerHighest;
-                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
-                ctx.stroke();
-            }
-            
-            // Draw Indicator
-            ctx.beginPath();
-            ctx.strokeStyle = control._colors.primary;
-            
-            var startAngle, endAngle;
-            
-            if (control.indeterminate) {
-                // Rotated frame + expanding/contracting arc
-                // Canvas arc angles are in radians. 0 is 3 o'clock.
-                // We want to start from 12 o'clock (-PI/2) plus rotation.
+            if (control.wavy) {
+                // Wavy Circle Implementation
+                var waveCount = 12; // Number of petals/waves
+                var waveAmplitude = 3; // Depth of wave
+                var safeRadius = radius - waveAmplitude; // Prevent clipping
                 
-                var rotationRad = (control._rotation - 90) * Math.PI / 180;
-                var offsetRad = control._arcOffset * Math.PI / 180;
-                var sweepRad = control._arcSweep * Math.PI / 180;
+                // Helper to draw wavy arc
+                var drawWavyArc = function(startAngle, endAngle, color) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = color;
+                    
+                    var step = 0.05; // radian step
+                    // Ensure we cover the full range
+                    if (endAngle < startAngle) endAngle += Math.PI * 2;
+                    
+                    var first = true;
+                    
+                    for (var a = startAngle; a <= endAngle; a += step) {
+                        var r = safeRadius + waveAmplitude * Math.sin(a * waveCount + control._wavyPhase);
+                        
+                        // Convert polar to cartesian (Canvas 0 is 3 o'clock, adjust to 12 o'clock)
+                        var adjustedA = a - Math.PI/2 + (control._rotation * Math.PI / 180);
+                        
+                        var x = centerX + r * Math.cos(adjustedA);
+                        var y = centerY + r * Math.sin(adjustedA);
+                        
+                        if (first) {
+                            ctx.moveTo(x, y);
+                            first = false;
+                        } else {
+                            ctx.lineTo(x, y);
+                        }
+                    }
+                    ctx.stroke();
+                };
                 
-                startAngle = rotationRad + offsetRad;
-                endAngle = startAngle + sweepRad;
+                // Draw Track
+                if (control.showTrack) {
+                    drawWavyArc(0, Math.PI * 2, control._colors.surfaceContainerHighest);
+                }
                 
-                ctx.arc(centerX, centerY, radius, startAngle, endAngle, false);
-                ctx.stroke();
+                // Draw Indicator
+                var start = 0;
+                var end = 0;
+                
+                if (control.indeterminate) {
+                    drawWavyArc(0, Math.PI * 1.5, control._colors.primary);
+                } else {
+                    // Determinate
+                    if (control.value > 0) {
+                        end = control.value * Math.PI * 2;
+                        drawWavyArc(0, end, control._colors.primary);
+                    }
+                }
+                
             } else {
-                // Determinate
-                if (control.value > 0) {
-                    startAngle = -Math.PI / 2; // -90 degrees (12 o'clock)
-                    endAngle = startAngle + (control.value * 2 * Math.PI);
+                // Standard Implementation
+                // Draw Track (only for determinate)
+                if (!control.indeterminate && control.showTrack) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = control._colors.surfaceContainerHighest;
+                    ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                    ctx.stroke();
+                }
+                
+                // Draw Indicator
+                ctx.beginPath();
+                ctx.strokeStyle = control._colors.primary;
+                
+                var startAngle, endAngle;
+                
+                if (control.indeterminate) {
+                    // Rotated frame + expanding/contracting arc
+                    // Canvas arc angles are in radians. 0 is 3 o'clock.
+                    // We want to start from 12 o'clock (-PI/2) plus rotation.
+                    
+                    var rotationRad = (control._rotation - 90) * Math.PI / 180;
+                    var offsetRad = control._arcOffset * Math.PI / 180;
+                    var sweepRad = control._arcSweep * Math.PI / 180;
+                    
+                    startAngle = rotationRad + offsetRad;
+                    endAngle = startAngle + sweepRad;
+                    
                     ctx.arc(centerX, centerY, radius, startAngle, endAngle, false);
                     ctx.stroke();
+                } else {
+                    // Determinate
+                    if (control.value > 0) {
+                        startAngle = -Math.PI / 2; // -90 degrees (12 o'clock)
+                        endAngle = startAngle + (control.value * 2 * Math.PI);
+                        ctx.arc(centerX, centerY, radius, startAngle, endAngle, false);
+                        ctx.stroke();
+                    }
                 }
             }
         }

@@ -98,13 +98,6 @@ Item {
                                 font.pixelSize: 24
                                 color: navItem.selected ? Theme.color.onSecondaryContainerColor : Theme.color.onSurfaceVariantColor
                             }
-
-                            // Ripple on the pill only
-                            Ripple {
-                                anchors.fill: parent
-                                clipRadius: 16
-                                onClicked: root.currentIndex = index
-                            }
                         }
                         
                         // Label

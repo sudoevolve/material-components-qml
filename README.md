@@ -1,5 +1,9 @@
 # Material Design 3 for Qt Quick (QML)
 
+<p align="center">
+  <img src="preview/app_icon.svg" width="128" height="128" alt="Material Design 3 Icon">
+</p>
+
 This project implements **Material Design 3 (Material You)** components using Qt Quick (QML) and C++. It aims to provide a comprehensive set of UI components that follow the latest Google Material Design guidelines, complete with dynamic color support and adaptive layouts.
 
 ## Preview

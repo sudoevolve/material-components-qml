@@ -942,6 +942,30 @@ Item {
                     value: 0.75
                     indeterminate: progressSwitch.checked
                 }
+
+                // Wavy Progress
+                Text { 
+                    text: "Wavy Progress" 
+                    color: Theme.color.onSurfaceVariantColor 
+                    font.family: Theme.typography.labelLarge.family
+                    Layout.topMargin: 16
+                }
+
+                // Wavy Linear
+                Md3.LinearProgress {
+                    Layout.fillWidth: true
+                    value: 0.5
+                    wavy: true
+                    indeterminate: progressSwitch.checked
+                }
+                
+                // Wavy Circular
+                Md3.CircularProgress {
+                    Layout.alignment: Qt.AlignHCenter
+                    value: 0.75
+                    wavy: true
+                    indeterminate: progressSwitch.checked
+                }
                 
                 // Loading Indicator (New)
                 Text { 
@@ -1256,21 +1280,6 @@ Item {
                 }
             }
 
-            // Navigation
-            Text {
-                text: "Navigation"
-                font.pixelSize: Theme.typography.headlineSmall.size
-                color: Theme.color.onSurfaceColor
-                Layout.alignment: Qt.AlignHCenter
-            }
-
-            Md3.Button {
-                text: "Open Right Drawer"
-                type: "filled"
-                Layout.alignment: Qt.AlignHCenter
-                onClicked: rightDrawer.open()
-            }
-
             Item { height: 32 } // Bottom spacer
         }
     }
@@ -1310,36 +1319,6 @@ Item {
             
             onMoved: {
                 flickable.contentY = value
-            }
-        }
-    }
-
-    // Right Drawer (Side Sheet)
-    Md3.SideSheet {
-        id: rightDrawer
-        title: "Right Drawer"
-
-        ListView {
-            anchors.fill: parent
-            clip: true
-            model: 20
-            delegate: Item {
-                width: parent.width
-                height: 56
-                
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: parent.left
-                    anchors.leftMargin: 24
-                    text: "Menu Item " + (index + 1)
-                    font.pixelSize: Theme.typography.bodyLarge.size
-                    color: Theme.color.onSurfaceColor
-                }
-                
-                Md3.Ripple {
-                    anchors.fill: parent
-                    onClicked: console.log("Clicked item", index)
-                }
             }
         }
     }

@@ -236,6 +236,24 @@ Item {
                             model: ["Home", "Components", "Navigation"]
                         }
                     }
+
+                    // Side Sheet Demo
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 16
+                        
+                        Text {
+                            text: "Side Sheet (Right Drawer)"
+                            font.pixelSize: Theme.typography.titleMedium.size
+                            color: Theme.color.primary
+                        }
+                        
+                        Md3.Button {
+                            text: "Open Right Drawer"
+                            type: "filled"
+                            onClicked: rightDrawer.open()
+                        }
+                    }
                     
                     Item { Layout.preferredHeight: 64 }
                 }
@@ -298,6 +316,37 @@ Item {
                         color: Theme.color.onSurfaceVariantColor
                         Layout.alignment: Qt.AlignHCenter
                     }
+                }
+            }
+        }
+
+    }
+
+    // Right Drawer (Side Sheet)
+    Md3.SideSheet {
+        id: rightDrawer
+        title: "Right Drawer"
+
+        ListView {
+            anchors.fill: parent
+            clip: true
+            model: 20
+            delegate: Item {
+                width: parent.width
+                height: 56
+                
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 24
+                    text: "Menu Item " + (index + 1)
+                    font.pixelSize: Theme.typography.bodyLarge.size
+                    color: Theme.color.onSurfaceColor
+                }
+                
+                Md3.Ripple {
+                    anchors.fill: parent
+                    onClicked: console.log("Clicked item", index)
                 }
             }
         }

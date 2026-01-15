@@ -1,0 +1,33 @@
+<svg width="256" height="256" viewBox="0 0 256 256" 
+      xmlns="http://www.w3.org/2000/svg"> 
+  
+   <!-- Background --> 
+   <rect 
+     x="16" 
+     y="16" 
+     width="224" 
+     height="224" 
+     rx="56" 
+     fill="#E6D9F5" /> 
+  
+   <!-- Q outer ring --> 
+   <circle 
+     cx="128" 
+     cy="128" 
+     r="60" 
+     fill="none" 
+     stroke="#FFFFFF" 
+     stroke-width="28" 
+     stroke-linecap="round" /> 
+  
+   <!-- Q tail --> 
+   <rect 
+     x="160" 
+     y="160" 
+     width="36" 
+     height="16" 
+     rx="8" 
+     transform="rotate(45 160 160)" 
+     fill="#FFFFFF" /> 
+  
+ </svg>

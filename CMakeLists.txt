@@ -14,6 +14,10 @@ qt_add_executable(appmd3
     stylemanager.h
 )
 
+if(WIN32)
+    target_sources(appmd3 PRIVATE app_icon.rc)
+endif()
+
 # Material Color Utilities
 set(MCU_DIR "${CMAKE_CURRENT_SOURCE_DIR}/material-color-utilities")
 target_include_directories(appmd3 PRIVATE ${MCU_DIR})
