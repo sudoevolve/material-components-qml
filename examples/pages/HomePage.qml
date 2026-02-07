@@ -62,7 +62,7 @@ Item {
                     Md3.Button {
                         text: "About MD3"
                         type: "outlined"
-                        onClicked: Qt.openUrlExternally("https://m3.material.io/")    
+                        onClicked: Qt.openUrlExternally("https://meow2030.github.io/Qtcraft/")    
                     }
                 }
 
