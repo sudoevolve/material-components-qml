@@ -376,6 +376,7 @@ Item {
         anchors.rightMargin: -10
         hoverEnabled: true
         enabled: control.enabled
+        preventStealing: true
         
         onPressed: (mouse) => {
             control.updateFromMouse(mouse.x)
@@ -408,3 +409,4 @@ Item {
         }
     }
 }
+
