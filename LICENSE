@@ -1,3 +1,26 @@
+MD3 Repository Licensing Summary
+
+Copyright (c) 2024-2026 sudoevolve (Aino) <sudoevolve@gmail.com>
+Project: https://github.com/sudoevolve
+
+This repository contains both open-source and commercial components:
+
+1) Open-Source Components (LGPL-3.0-or-later)
+- Scope: src/Core/
+- License text: this file (LGPL v3.0)
+
+2) Commercial Components (Paid License Required)
+- Scope: src/Extras/
+- License: EULA.txt (commercial license)
+- Important: src/Extras/ is NOT licensed under LGPL and may not be used, copied, modified,
+  or distributed without a commercial license from sudoevolve.
+
+3) Third-Party Dependencies
+- This repository may include third-party code (for example under 3rdparty/). Such code is
+  licensed under its own license terms and is not covered by the licenses above.
+
+------------------------------------------------------------------------------
+
 GNU LESSER GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 

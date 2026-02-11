@@ -6,6 +6,19 @@
 
 This project implements **Material Design 3 (Material You)** components using Qt Quick (QML) and C++. It aims to provide a comprehensive set of UI components that follow the latest Google Material Design guidelines, complete with dynamic color support, adaptive layouts, and a desktop widget system.
 
+## MD3 Pro (Commercial)
+
+MD3 Pro is built for enterprise-grade desktop apps where performance and developer efficiency matter.
+
+- **Pro Charts**: interactive charts (zoom, pan, crosshair, high-volume data)
+- **DataGrid**: enterprise table with virtualization (100k+ rows), sorting/filtering, column operations
+- **Hot Reload**: live QML workflow for faster iteration
+- **Performance Monitor / Profiler**: in-app performance overlay and diagnostics
+- **Commercial License + Priority Support**
+
+Buy / Learn more:
+- https://meow2030.github.io/Qtcraft/
+
 ## Preview
 
 <table align="center">
@@ -48,11 +61,14 @@ This project implements **Material Design 3 (Material You)** components using Qt
 - **Containers**: `Card`, `Carousel`, `Dialog`, `Chip`
 - **Status**: `CircularProgress`, `LinearProgress`, `LoadingIndicator`, `ToolTip`
 - **Visuals**: `Ripple`
+- **Utilities**: `ScrollBar`, `DataTable`
 
 ## Project Structure
 
-- `src/`: The core library code (Material Design 3 components and C++ backend).
-- `examples/`: An example application demonstrating how to use the components and widgets.
+- `src/Core/`: QML module `md3.Core` (components + Theme system) + C++ backend (`md3Core`).
+- `src/App/`: Gallery app `md3.App` (demo pages + desktop widgets) + executable `appmd3`.
+- `scaffold/`: PowerShell project scaffold (templates + `New-MD3Project.ps1`).
+- `docs/`: Product pages and roadmap (including MD3 Pro roadmap).
 
 ## Build & Run
 
@@ -66,106 +82,68 @@ This project implements **Material Design 3 (Material You)** components using Qt
 
 1.  **Clone the repository**:
     ```bash
-    git clone https://github.com/your-username/material-components-qml.git
-    cd material-components-qml/md3
+    git clone https://github.com/sudoevolve/material-components-qml.git md3
+    cd md3
     ```
 
 2.  **Configure with CMake**:
     ```bash
-    mkdir build
-    cd build
-    cmake ..
+    cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
     ```
 
 3.  **Build**:
     ```bash
-    cmake --build .
+    cmake --build build
     ```
 
 4.  **Run Example**:
-    - On Windows: `.\examples\appmd3.exe` (or inside Debug/Release folders depending on generator)
-    - On Linux/macOS: `./examples/appmd3`
+    - Single-config generators (Ninja/Makefiles): `build/bin/appmd3` (Windows: `build/bin/appmd3.exe`)
+    - Multi-config generators (MSVC): `build/bin/Debug/appmd3.exe` or `build/bin/Release/appmd3.exe`
 
 ## Usage in Your Project
 
-You can use this library in your own projects in two ways:
+The recommended way is to vendor MD3 as source and build `md3Core` together with your app.
 
-### Option 1: Source Integration (Recommended for development)
+### Option: Source Integration (Recommended)
 
-Simply copy the `src` directory into your project (e.g., as a git submodule) and add it to your `CMakeLists.txt`:
-
-```cmake
-# Add the library subdirectory
-add_subdirectory(path/to/md3/src)
-
-# Link your application against the library
-target_link_libraries(your_app PRIVATE md3::md3)
-```
-
-### Option 2: Installed Library
-
-Build and install the library to your system or a local directory:
-
-```bash
-# Build and Install
-cmake -B build
-cmake --build build
-cmake --install build --prefix "C:/MyLibs/md3"  # Change path as needed
-```
-
-Then in your project's `CMakeLists.txt`:
+Add MD3 Core to your project:
 
 ```cmake
-# Find the installed package
-find_package(md3 REQUIRED)
+set(MD3_SOURCE_DIR "path/to/md3")
 
-# Link your application
-target_link_libraries(your_app PRIVATE md3::md3)
+add_subdirectory("${MD3_SOURCE_DIR}/src/Core" md3Core_build)
+
+target_link_libraries(your_app
+    PRIVATE
+        Qt6::Quick
+        md3Core
+)
 ```
 
 ### QML Usage
 
-In your QML files, import the module:
+In your QML files, import `md3.Core`:
 
 ```qml
 import QtQuick
-import md3
+import QtQuick.Window
+import md3.Core
 
-ApplicationWindow {
+Window {
     visible: true
     width: 800
     height: 600
+    color: Theme.color.background
 
-    // Use MD3 Components
     Button {
         text: "Hello MD3"
-        onClicked: console.log("Clicked!")
         anchors.centerIn: parent
-    }
-
-    // Access Theme
-    Rectangle {
-        color: Theme.primary
-        // ...
     }
 }
 ```
 
 ## Desktop Widgets
 
-The project includes a desktop widget manager that allows you to run QML components as independent, frameless desktop windows.
+The gallery app includes a desktop widget manager that can run QML widgets as standalone frameless windows.
 
 - **Manage**: Create, pin, and organize widgets on your desktop.
-
-## Project Scaffold
-
-A PowerShell scaffold script is provided to quickly generate new projects based on this library.
-
-**Usage:**
-
-1. Open PowerShell in the `md3` root directory.
-2. Run the scaffold script:
-   ```powershell
-   ./scaffold/scaffold.ps1
-   ```
-3. Follow the prompts to create a new project with your desired name and template.
