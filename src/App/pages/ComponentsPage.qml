@@ -1283,6 +1283,57 @@ Item {
                 }
             }
 
+            // Divider
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.maximumWidth: 600
+                Layout.alignment: Qt.AlignHCenter
+                height: 1
+                color: Theme.color.outlineVariant
+            }
+
+            // datatable Section
+            Text {
+                text: "Data Table"
+                font.pixelSize: Theme.typography.headlineSmall.size
+                color: Theme.color.onSurfaceColor
+                Layout.alignment: Qt.AlignHCenter
+            }
+            
+            // Data Table Container with Hover Detection
+            Item {
+                Layout.fillWidth: true
+                Layout.preferredHeight: 300
+                Layout.margins: 20
+                
+                DataTable {
+                    id: dataTable
+                    anchors.fill: parent
+                    // No margins here as they are handled by container
+                    
+                    columns: [
+                        {label: "ID", role: "id", width: 60},
+                        {label: "Name", role: "name", width: 150},
+                        {label: "Role", role: "role", width: 120},
+                        {label: "Status", role: "status", width: 100}
+                    ]
+                    
+                    rowData: [
+                        {id: 1, name: "Alice Johnson", role: "Engineer", status: "Active"},
+                        {id: 2, name: "Bob Smith", role: "Designer", status: "Inactive"},
+                        {id: 3, name: "Charlie Brown", role: "Manager", status: "Active"},
+                        {id: 4, name: "Diana Prince", role: "Developer", status: "Active"},
+                        {id: 5, name: "Evan Wright", role: "Tester", status: "Pending"},
+                        {id: 6, name: "Frank Miller", role: "Analyst", status: "Active"},
+                        {id: 7, name: "Grace Lee", role: "Director", status: "Active"},
+                        {id: 8, name: "Henry Wilson", role: "Support", status: "Inactive"}
+                    ]
+                    
+                    showCheckBoxes: true
+                }
+            }
+
+
             Item { height: 32 } // Bottom spacer
         }
     }
