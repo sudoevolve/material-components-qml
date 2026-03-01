@@ -1,4 +1,4 @@
-﻿import QtQuick
+import QtQuick
 import QtQuick.Layouts
 import md3.Core
 Item {
@@ -30,7 +30,8 @@ Item {
     
     RowLayout {
         id: rowLayout
-        anchors.centerIn: parent
+        anchors.verticalCenter: parent.verticalCenter
+        anchors.left: parent.left
         spacing: 0
         
         // Checkbox Container (Touch Target)

@@ -10,6 +10,10 @@ qt_add_executable(appmd3
     main.cpp
 )
 
+target_compile_definitions(appmd3 PRIVATE
+    PROJECT_SOURCE_DIR="${CMAKE_SOURCE_DIR}"
+)
+
 if(WIN32)
     target_sources(appmd3 PRIVATE app_icon.rc)
 endif()
@@ -38,8 +42,30 @@ set_target_properties(appmd3 PROPERTIES
 target_link_libraries(appmd3
     PRIVATE
         Qt6::Quick
-        md3Core
 )
+
+if(MSVC)
+    target_link_libraries(appmd3
+        PRIVATE
+            md3Core
+    )
+
+    target_link_options(appmd3 PRIVATE
+        /WHOLEARCHIVE:md3Core
+    )
+elseif(MINGW OR (UNIX AND NOT APPLE))
+    target_link_libraries(appmd3
+        PRIVATE
+            -Wl,--whole-archive
+            md3Core
+            -Wl,--no-whole-archive
+    )
+else()
+    target_link_libraries(appmd3
+        PRIVATE
+            md3Core
+    )
+endif()
 
 qt_import_qml_plugins(appmd3)
 qt_finalize_executable(appmd3)

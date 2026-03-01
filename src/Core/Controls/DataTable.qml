@@ -43,8 +43,8 @@ Item {
         updateSelectedIndices()
     }
     
-    implicitWidth: 600
-    implicitHeight: 400
+    implicitWidth: 400
+    implicitHeight: 300
     
     // Internal Model for ListView
     ListModel {

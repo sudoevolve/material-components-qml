@@ -1,4 +1,4 @@
-﻿import QtQuick
+import QtQuick
 import md3.Core
 Item {
     id: control
@@ -11,6 +11,16 @@ Item {
     implicitHeight: wavy ? 16 : 4
     
     property var _colors: Theme.color
+    
+    // Animation control
+    property bool _initialized: false
+    Component.onCompleted: _initialized = true
+    
+    property real _visualValue: Math.max(0.0, Math.min(1.0, control.value))
+    Behavior on _visualValue {
+        enabled: control._initialized
+        NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
+    }
     
     // Standard Linear Progress
     Rectangle {
@@ -25,13 +35,9 @@ Item {
         Rectangle {
             visible: !control.indeterminate
             height: parent.height
-            width: parent.width * Math.max(0, Math.min(1, control.value))
+            width: parent.width * control._visualValue
             color: _colors.primary
             radius: height / 2
-            
-            Behavior on width {
-                NumberAnimation { duration: 200; easing.type: Easing.OutQuad }
-            }
         }
         
         // Indeterminate Indicator

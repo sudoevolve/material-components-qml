@@ -6,20 +6,36 @@ Item {
     id: root
     anchors.fill: parent
 
-    property int currentNavIndex: 0
+    property var currentItem: navItems[0]
 
-    ListModel {
-        id: navModel
-        ListElement { name: "Home"; page: "pages/HomePage.qml"; iconName: "home" }
-        ListElement { name: "Components"; page: "pages/ComponentsPage.qml"; iconName: "smart_button" }
-        ListElement { name: "Widgets"; page: "pages/WidgetsPage.qml"; iconName: "widgets" }
-        ListElement { name: "Navigation"; page: "pages/NavigationPage.qml"; iconName: "menu" }
-        ListElement { name: "Color"; page: "pages/ColorPage.qml"; iconName: "palette" }
-        ListElement { name: "Typography"; page: "pages/TypographyPage.qml"; iconName: "text_fields" }
-        ListElement { name: "Icons"; page: "pages/IconPage.qml"; iconName: "mood" }
-        ListElement { name: "Settings"; page: "pages/SettingsPage.qml"; iconName: "settings" }
-        ListElement { name: "About"; page: "pages/AboutPage.qml"; iconName: "info" }
-    }
+    property var navItems: [
+        { type: "item", text: "Home", icon: "home", page: "pages/HomePage.qml" },
+        { 
+            type: "group", 
+            text: "Components", 
+            icon: "widgets",
+            children: [
+                { type: "item", text: "Core", icon: "smart_button", page: "pages/ComponentsPage.qml" },
+                { type: "item", text: "Widgets", icon: "widgets", page: "pages/WidgetsPage.qml" },
+                { type: "item", text: "Pro", icon: "workspace_premium", page: "pages/ProPage.qml" }
+            ]
+        },
+        { type: "divider" },
+        { 
+            type: "group", 
+            text: "Design", 
+            icon: "palette",
+            children: [
+                { type: "item", text: "Navigation", icon: "menu", page: "pages/NavigationPage.qml" },
+                { type: "item", text: "Color", icon: "palette", page: "pages/ColorPage.qml" },
+                { type: "item", text: "Typography", icon: "text_fields", page: "pages/TypographyPage.qml" },
+                { type: "item", text: "Icons", icon: "mood", page: "pages/IconPage.qml" }
+            ]
+        },
+        { type: "divider" },
+        { type: "item", text: "Settings", icon: "settings", page: "pages/SettingsPage.qml" },
+        { type: "item", text: "About", icon: "info", page: "pages/AboutPage.qml" }
+    ]
 
     RowLayout {
         anchors.fill: parent
@@ -30,60 +46,9 @@ Item {
             modal: false
             drawerWidth: 260
             title: "Material Design"
-
-            ListView {
-                anchors.fill: parent
-                anchors.margins: 12
-                model: navModel
-                spacing: 4
-                clip: true
-
-                delegate: Rectangle {
-                    width: parent.width
-                    height: 56
-                    radius: Theme.shape.cornerFull
-                    color: root.currentNavIndex === index ? Theme.color.secondaryContainer : "transparent"
-
-                    Ripple {
-                        anchors.fill: parent
-                        rippleColor: Theme.color.onSecondaryContainerColor
-                        clipRadius: parent.radius
-                        onClicked: {
-                            if (root.currentNavIndex !== index) {
-                                root.currentNavIndex = index
-                            }
-                        }
-                    }
-
-                    RowLayout {
-                        anchors.fill: parent
-                        anchors.leftMargin: 16
-                        anchors.rightMargin: 24
-                        spacing: 12
-
-                        Text {
-                            text: iconName
-                            font.family: Theme.iconFont.name
-                            font.pixelSize: 24
-                            Layout.alignment: Qt.AlignVCenter
-                            verticalAlignment: Text.AlignVCenter
-                            color: root.currentNavIndex === index ? Theme.color.onSecondaryContainerColor : Theme.color.onSurfaceVariantColor
-                        }
-
-                        Text {
-                            text: name
-                            font.family: Theme.typography.labelLarge.family
-                            font.pixelSize: Theme.typography.labelLarge.size
-                            font.weight: Theme.typography.labelLarge.weight
-                            Layout.alignment: Qt.AlignVCenter
-                            verticalAlignment: Text.AlignVCenter
-                            color: root.currentNavIndex === index ? Theme.color.onSecondaryContainerColor : Theme.color.onSurfaceVariantColor
-                        }
-
-                        Item { Layout.fillWidth: true }
-                    }
-                }
-            }
+            model: root.navItems
+            currentItem: root.currentItem
+            onItemClicked: (itemData) => root.currentItem = itemData
         }
 
         Rectangle {
@@ -96,18 +61,48 @@ Item {
                 anchors.fill: parent
 
                 Loader {
-                    id: pageLoader
                     anchors.fill: parent
-                    source: navModel.get(root.currentNavIndex).page
+                    sourceComponent: prodPageLoader
+                }
 
-                    onLoaded: {
-                        if (item) {
-                            enterAnim.stop()
-                            animOpacity.target = item
-                            animY.target = item
-                            item.opacity = 0
-                            item.y = 50
-                            enterAnim.start()
+                Component {
+                    id: prodPageLoader
+
+                    Loader {
+                        id: pageLoader
+                        anchors.fill: parent
+                        source: root.currentItem ? root.currentItem.page : ""
+
+                        onLoaded: {
+                            if (item) {
+                                enterAnim.stop()
+                                animOpacity.target = item
+                                animY.target = item
+                                item.opacity = 0
+                                item.y = 50
+                                enterAnim.start()
+                            }
+                        }
+                    }
+                }
+
+                Component {
+                    id: devPageLoader
+
+                    Loader {
+                        id: pageLoader
+                        anchors.fill: parent
+                        source: ProjectSourceDir + "/src/App/" + (root.currentItem ? root.currentItem.page : "")
+
+                        onLoaded: {
+                            if (item) {
+                                enterAnim.stop()
+                                animOpacity.target = item
+                                animY.target = item
+                                item.opacity = 0
+                                item.y = 50
+                                enterAnim.start()
+                            }
                         }
                     }
                 }
@@ -120,4 +115,5 @@ Item {
             }
         }
     }
+
 }

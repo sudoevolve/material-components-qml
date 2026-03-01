@@ -93,8 +93,11 @@ Item {
     }
 
     function updateFromMouse(mouseX) {
-        var relativeX = mouseX - trackContainer.x
-        var pos = relativeX / trackContainer.width
+        // mouseX is relative to trackContainer
+        var padding = trackContainer.height / 2
+        var availableWidth = trackContainer.width - (padding * 2)
+        var relativeX = mouseX - padding
+        var pos = Math.max(0, Math.min(1, relativeX / availableWidth))
         var rawValue = from + (pos * _range)
         
         if (!rangeMode) {
@@ -125,25 +128,51 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        height: 5
+        height: 16
         
-        // Inactive Track (Background)
+        // Internal geometry
+        property real thumbWidth: 4
+        property real gap: 6
+        property real padding: height / 2
+        property real availableWidth: width - (padding * 2)
+        property real startX: padding + (control.rangeMode ? (control._firstPos * availableWidth) : 0)
+        property real endX: padding + (control.rangeMode ? (control._secondPos * availableWidth) : (control._position * availableWidth))
+
+        // Inactive Track (Background) - Split into Left and Right segments
+        // Left Segment (Range Mode only: Before first handle)
         Rectangle {
-            anchors.fill: parent
-            radius: 2
+            visible: control.rangeMode
+            anchors.left: parent.left
+            anchors.verticalCenter: parent.verticalCenter
+            width: Math.max(0, trackContainer.startX - (trackContainer.gap + trackContainer.thumbWidth / 2))
+            height: parent.height
+            radius: height / 2
+            color: control.enabled ? _colors.surfaceContainerHighest : Qt.rgba(_onSurfaceColor.r, _onSurfaceColor.g, _onSurfaceColor.b, 0.12)
+        }
+
+        // Right Segment (After last handle)
+        Rectangle {
+            anchors.right: parent.right
+            anchors.verticalCenter: parent.verticalCenter
+            width: Math.max(0, parent.width - (trackContainer.endX + (trackContainer.gap + trackContainer.thumbWidth / 2)))
+            height: parent.height
+            radius: height / 2
             color: control.enabled ? _colors.surfaceContainerHighest : Qt.rgba(_onSurfaceColor.r, _onSurfaceColor.g, _onSurfaceColor.b, 0.12)
         }
         
         // Active Track (Fill)
         Rectangle {
             id: activeTrack
-            x: control.rangeMode ? control._firstPos * parent.width : 0
-            width: control.rangeMode ? (control._secondPos - control._firstPos) * parent.width : control._position * parent.width
-            height: 4
-            radius: 2
+            x: control.rangeMode ? (trackContainer.startX + (trackContainer.gap + trackContainer.thumbWidth / 2)) : 0
+            width: Math.max(0, (control.rangeMode ? 
+                   (trackContainer.endX - trackContainer.startX - (2 * trackContainer.gap) - trackContainer.thumbWidth) : 
+                   (trackContainer.endX - (trackContainer.gap + trackContainer.thumbWidth / 2))))
+            anchors.verticalCenter: parent.verticalCenter
+            height: parent.height
+            radius: height / 2
             color: control.enabled ? _colors.primary : Qt.rgba(_onSurfaceColor.r, _onSurfaceColor.g, _onSurfaceColor.b, 0.38)
         }
-        
+
         // Tick Marks
         Repeater {
             model: control.tickMarksEnabled && control.stepSize > 0 ? Math.floor(control._range / control.stepSize) + 1 : 0
@@ -152,8 +181,8 @@ Item {
                 width: 4
                 height: 4
                 radius: 2
-                y: (parent.height - height) / 2
-                x: (index * control.stepSize / control._range) * parent.width - (width / 2)
+                anchors.verticalCenter: parent.verticalCenter
+                x: trackContainer.padding + ((index * control.stepSize / control._range) * trackContainer.availableWidth) - (width / 2)
                 
                 color: {
                     var stepVal = control.from + (index * control.stepSize)
@@ -166,6 +195,7 @@ Item {
                     return isActive ? _colors.onPrimaryColor : _colors.onSurfaceVariantColor
                 }
                 opacity: 0.38
+                visible: true // Ensure visibility
             }
         }
     }
@@ -174,7 +204,7 @@ Item {
     Item {
         id: handle1
         property real pos: control.rangeMode ? control._firstPos : control._position
-        x: (trackContainer.width * pos) - (width / 2)
+        x: trackContainer.padding + (trackContainer.availableWidth * pos) - (width / 2)
         anchors.verticalCenter: parent.verticalCenter
         width: 44
         height: 44
@@ -184,20 +214,35 @@ Item {
         property bool isHovered: control.rangeMode ? (mouseArea.containsMouse && control._closestHandle === 1) : mouseArea.containsMouse
         property bool isPressed: control.rangeMode ? (mouseArea.pressed && control._draggingHandle === 1) : mouseArea.pressed
 
-        // State Layer (Hover/Press effect)
+        // State Layer (Hover/Press effect) - Keeping circle for touch target feedback?
+        // New spec says "pressing the thumb adjusts its width".
+        // Let's implement the vertical bar thumb.
+        
         Rectangle {
+            id: thumbVisual
             anchors.centerIn: parent
-            width: 40
-            height: 40
-            radius: 20
+            width: 4
+            height: 44
+            radius: 2
             color: _colors.primary
             visible: control.enabled
-            opacity: {
-                if (handle1.isPressed) return 0.12
-                if (handle1.isHovered) return 0.08
-                return 0
+            
+            // Interaction State (Width change)
+            states: [
+                State {
+                    name: "pressed"
+                    when: handle1.isPressed
+                    PropertyChanges { target: thumbVisual; width: 2 } // Thinner on press? Or wider? Result #3 says "become a very thin line".
+                },
+                State {
+                    name: "hovered"
+                    when: handle1.isHovered && !handle1.isPressed
+                    PropertyChanges { target: thumbVisual; width: 6 } // Slightly wider on hover?
+                }
+            ]
+            transitions: Transition {
+                NumberAnimation { properties: "width"; duration: 200; easing.type: Easing.OutCubic }
             }
-            Behavior on opacity { NumberAnimation { duration: 150 } }
         }
         
         // Value Label (Tooltip)
@@ -242,42 +287,14 @@ Item {
             }
         }
 
-        // Thumb Backing
-        Rectangle {
-            anchors.fill: thumb1
-            radius: thumb1.radius
-            color: _colors.surface
-            visible: !control.enabled
-        }
-        
-        // Thumb
-        Rectangle {
-            id: thumb1
-            anchors.centerIn: parent
-            width: handle1.isPressed ? 22 : 20
-            height: width
-            radius: width / 2
-            color: control.enabled ? _colors.primary : Qt.rgba(_onSurfaceColor.r, _onSurfaceColor.g, _onSurfaceColor.b, 0.38)
-            
-            // Shadow
-            layer.enabled: control.enabled
-            layer.effect: MultiEffect {
-                shadowEnabled: true
-                shadowColor: _colors.shadow
-                shadowBlur: 4
-                shadowVerticalOffset: 2
-                shadowOpacity: 0.2
-            }
-            
-            Behavior on width { NumberAnimation { duration: 100 } }
-        }
+
     }
     
     // Handle 2 (Only for Range Mode)
     Item {
         id: handle2
         visible: control.rangeMode
-        x: (trackContainer.width * control._secondPos) - (width / 2)
+        x: trackContainer.padding + (trackContainer.availableWidth * control._secondPos) - (width / 2)
         anchors.verticalCenter: parent.verticalCenter
         width: 44
         height: 44
@@ -286,20 +303,30 @@ Item {
         property bool isHovered: mouseArea.containsMouse && control._closestHandle === 2
         property bool isPressed: mouseArea.pressed && control._draggingHandle === 2
 
-        // State Layer
         Rectangle {
+            id: thumbVisual2
             anchors.centerIn: parent
-            width: 40
-            height: 40
-            radius: 20
+            width: 4
+            height: 44
+            radius: 2
             color: _colors.primary
             visible: control.enabled
-            opacity: {
-                if (handle2.isPressed) return 0.12
-                if (handle2.isHovered) return 0.08
-                return 0
+            
+            states: [
+                State {
+                    name: "pressed"
+                    when: handle2.isPressed
+                    PropertyChanges { target: thumbVisual2; width: 2 }
+                },
+                State {
+                    name: "hovered"
+                    when: handle2.isHovered && !handle2.isPressed
+                    PropertyChanges { target: thumbVisual2; width: 6 }
+                }
+            ]
+            transitions: Transition {
+                NumberAnimation { properties: "width"; duration: 200; easing.type: Easing.OutCubic }
             }
-            Behavior on opacity { NumberAnimation { duration: 150 } }
         }
         
         // Value Label
@@ -340,32 +367,7 @@ Item {
             }
         }
 
-        Rectangle {
-            anchors.fill: thumb2
-            radius: thumb2.radius
-            color: _colors.surface
-            visible: !control.enabled
-        }
-        
-        Rectangle {
-            id: thumb2
-            anchors.centerIn: parent
-            width: handle2.isPressed ? 22 : 20
-            height: width
-            radius: width / 2
-            color: control.enabled ? _colors.primary : Qt.rgba(_onSurfaceColor.r, _onSurfaceColor.g, _onSurfaceColor.b, 0.38)
-            
-            layer.enabled: control.enabled
-            layer.effect: MultiEffect {
-                shadowEnabled: true
-                shadowColor: _colors.shadow
-                shadowBlur: 4
-                shadowVerticalOffset: 2
-                shadowOpacity: 0.2
-            }
-            
-            Behavior on width { NumberAnimation { duration: 100 } }
-        }
+
     }
     
     MouseArea {
@@ -378,7 +380,8 @@ Item {
         preventStealing: true
         
         onPressed: (mouse) => {
-            control.updateFromMouse(mouse.x)
+            var localPos = trackContainer.mapFromItem(mouseArea, mouse.x, mouse.y)
+            control.updateFromMouse(localPos.x)
         }
         
         onReleased: {
@@ -386,13 +389,17 @@ Item {
         }
         
         onPositionChanged: (mouse) => {
+            var localPos = trackContainer.mapFromItem(mouseArea, mouse.x, mouse.y)
+            
             if (pressed) {
-                control.updateFromMouse(mouse.x)
+                control.updateFromMouse(localPos.x)
             } else {
                 // Update closest handle for hover effect
                 if (control.rangeMode) {
-                    var relativeX = mouse.x - trackContainer.x
-                    var pos = relativeX / trackContainer.width
+                    var padding = trackContainer.height / 2
+                    var availableWidth = trackContainer.width - (padding * 2)
+                    var relativeX = localPos.x - padding
+                    var pos = Math.max(0, Math.min(1, relativeX / availableWidth))
                     var val = from + (pos * _range)
                     var dist1 = Math.abs(val - firstValue)
                     var dist2 = Math.abs(val - secondValue)

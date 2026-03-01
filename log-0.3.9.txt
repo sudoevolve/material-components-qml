@@ -1,0 +1,10 @@
+【还在用 Flutter？2026 年我用 QML实现了企业级MD3组件库】 https://www.bilibili.com/video/BV17pPMz5Ev4
+更新了：
+
+新的slider
+Blurcard
+NavigationRail
+FABmenu
+Snackbar
+顺便修了点小bug
+优化一些小细节

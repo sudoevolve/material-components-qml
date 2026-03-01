@@ -1,4 +1,4 @@
-﻿import QtQuick
+import QtQuick
 import QtQuick.Layouts
 import md3.Core
 Item {
@@ -6,65 +6,70 @@ Item {
     width: parent.width
     height: parent.height
 
+    property bool isRail: true
+
     RowLayout {
         anchors.fill: parent
         spacing: 0
 
-        // Left Navigation Drawer (Standard/Permanent)
-        NavigationDrawer {
-            id: navDrawer
-            modal: false // Standard mode (side-by-side)
-            drawerWidth: 240
+        // Navigation Rail (Handles both Rail and Drawer states)
+        NavigationRail {
+            id: navRail
             Layout.fillHeight: true
             
-            ColumnLayout {
-                width: parent.width
-                spacing: 0
-                
-                // Drawer Items
-                Repeater {
-                    model: [
-                        {icon: "widgets", text: "Components"},
-                        {icon: "inbox", text: "Inbox"},
-                        {icon: "send", text: "Outbox"},
-                        {icon: "favorite", text: "Favorites"}
-                    ]
+            // Toggle between Rail (80dp) and Extended (240dp)
+            extended: !isRail
+            
+            // Model
+            model: [
+                {icon: "widgets", text: "Components"},
+                {icon: "inbox", text: "Inbox"},
+                {icon: "send", text: "Outbox"},
+                {icon: "favorite", text: "Favorites"}
+            ]
+            
+            currentIndex: contentStack.currentIndex
+            onItemClicked: (index) => contentStack.currentIndex = index
+            
+            // Header Component (Menu + FAB)
+            header: Component {
+                ColumnLayout {
+                    width: parent.width
+                    spacing: 0
                     
-                    delegate: Rectangle {
+                    // Menu Button
+                    Item {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: 56
-                        color: contentStack.currentIndex === index ? Theme.color.secondaryContainer : "transparent"
-                        radius: 28
+                        Layout.preferredHeight: 64
                         
-                        // Interaction
-                        Ripple {
-                            anchors.fill: parent
-                            clipRadius: 28
-                            onClicked: {
-                                contentStack.currentIndex = index
-                            }
+                        IconButton {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+                            // Center in Rail mode, Left align in Extended mode
+                            anchors.leftMargin: isRail ? (parent.width - width) / 2 : 12
+                            
+                            icon: "menu"
+                            onClicked: isRail = !isRail
+                            
+                            Behavior on anchors.leftMargin { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                         }
+                    }
+                    
+                    // FAB (Pencil)
+                    Item {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 80
                         
-                        RowLayout {
-                            anchors.fill: parent
-                            anchors.leftMargin: 24
-                            anchors.rightMargin: 24
-                            spacing: 12
+                        FAB {
+                            anchors.verticalCenter: parent.verticalCenter
+                            anchors.left: parent.left
+                            anchors.leftMargin: isRail ? (parent.width - width) / 2 : 16
                             
-                            Text {
-                                text: modelData.icon
-                                font.family: Theme.iconFont.name
-                                font.pixelSize: 24
-                                color: contentStack.currentIndex === index ? Theme.color.onSecondaryContainerColor : Theme.color.onSurfaceVariantColor
-                            }
+                            icon: "edit"
+                            type: isRail ? "standard" : "extended"
+                            text: isRail ? "" : "Compose"
                             
-                            Text {
-                                Layout.fillWidth: true
-                                text: modelData.text
-                                font.family: Theme.typography.labelLarge.family
-                                font.pixelSize: Theme.typography.labelLarge.size
-                                color: contentStack.currentIndex === index ? Theme.color.onSecondaryContainerColor : Theme.color.onSurfaceVariantColor
-                            }
+                            Behavior on anchors.leftMargin { NumberAnimation { duration: 200; easing.type: Easing.OutCubic } }
                         }
                     }
                 }
@@ -184,13 +189,13 @@ Item {
                         }
                     }
 
-                    // Tabs Demo
+                    // Tabs Demo (Primary - Icon + Text)
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 16
                         
                         Text {
-                            text: "Tabs"
+                            text: "Primary Tabs"
                             font.pixelSize: Theme.typography.titleMedium.size
                             color: Theme.color.primary
                         }
@@ -206,6 +211,7 @@ Item {
                             
                             Tabs {
                                 anchors.fill: parent
+                                type: "primary"
                                 model: [
                                     {text: "Video", icon: "videocam"},
                                     {text: "Photos", icon: "photo"},
@@ -216,6 +222,80 @@ Item {
                                 Rectangle { color: "#FFE0E0"; Text { anchors.centerIn: parent; text: "Video Content" } }
                                 Rectangle { color: "#E0FFE0"; Text { anchors.centerIn: parent; text: "Photo Content" } }
                                 Rectangle { color: "#E0E0FF"; Text { anchors.centerIn: parent; text: "Audio Content" } }
+                            }
+                        }
+                    }
+
+                    // Tabs Demo (Primary - Text Only)
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 16
+                        
+                        Text {
+                            text: "Primary Tabs (Text Only)"
+                            font.pixelSize: Theme.typography.titleMedium.size
+                            color: Theme.color.primary
+                        }
+                        
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 200
+                            color: Theme.color.surfaceContainerLowest
+                            border.color: Theme.color.outlineVariant
+                            border.width: 1
+                            radius: 12
+                            clip: true
+                            
+                            Tabs {
+                                anchors.fill: parent
+                                type: "primary"
+                                model: [
+                                    {text: "Overview", icon: ""},
+                                    {text: "Specs", icon: ""},
+                                    {text: "Reviews", icon: ""}
+                                ]
+                                
+                                // Content Views
+                                Rectangle { color: "#F0F0FF"; Text { anchors.centerIn: parent; text: "Overview Content" } }
+                                Rectangle { color: "#FFF0F0"; Text { anchors.centerIn: parent; text: "Specs Content" } }
+                                Rectangle { color: "#F0FFF0"; Text { anchors.centerIn: parent; text: "Reviews Content" } }
+                            }
+                        }
+                    }
+
+                    // Tabs Demo (Secondary)
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: 16
+                        
+                        Text {
+                            text: "Secondary Tabs"
+                            font.pixelSize: Theme.typography.titleMedium.size
+                            color: Theme.color.primary
+                        }
+                        
+                        Rectangle {
+                            Layout.fillWidth: true
+                            height: 200
+                            color: Theme.color.surfaceContainerLowest
+                            border.color: Theme.color.outlineVariant
+                            border.width: 1
+                            radius: 12
+                            clip: true
+                            
+                            Tabs {
+                                anchors.fill: parent
+                                type: "secondary"
+                                model: [
+                                    {text: "Explore", icon: ""},
+                                    {text: "Flights", icon: ""},
+                                    {text: "Trips", icon: ""}
+                                ]
+                                
+                                // Content Views
+                                Rectangle { color: "#F0F0FF"; Text { anchors.centerIn: parent; text: "Explore Content" } }
+                                Rectangle { color: "#FFF0F0"; Text { anchors.centerIn: parent; text: "Flights Content" } }
+                                Rectangle { color: "#F0FFF0"; Text { anchors.centerIn: parent; text: "Trips Content" } }
                             }
                         }
                     }
@@ -351,6 +431,5 @@ Item {
         }
     }
 }
-
 
 

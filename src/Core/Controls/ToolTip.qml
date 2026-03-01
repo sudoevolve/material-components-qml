@@ -1,4 +1,4 @@
-﻿import QtQuick
+import QtQuick
 import md3.Core
 Item {
     id: control
@@ -59,7 +59,6 @@ Item {
         to: 0.0
         duration: 150
         easing.type: Easing.InQuad
-        onFinished: control.visible = false
     }
     
     // Visuals
@@ -89,4 +88,3 @@ Item {
         }
     }
 }
-
