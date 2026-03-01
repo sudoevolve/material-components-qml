@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
+import "../../Core/Controls" as LocalControls
 import md3.Core
 
 Item {
@@ -1235,6 +1236,102 @@ Item {
                             ]
 
                             showCheckBoxes: true
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.maximumWidth: 600
+                        Layout.alignment: Qt.AlignHCenter
+                        height: 1
+                        color: Theme.color.outlineVariant
+                    }
+
+                    Text {
+                        text: "Charts (Canvas)"
+                        font.pixelSize: Theme.typography.headlineSmall.size
+                        color: Theme.color.onSurfaceColor
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        Layout.maximumWidth: 700
+                        Layout.alignment: Qt.AlignHCenter
+                        spacing: 24
+
+                        Card {
+                            type: "outlined"
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 240
+
+                            ColumnLayout {
+                                anchors.fill: parent
+                                anchors.margins: 16
+                                spacing: 12
+
+                                Text { text: "Line"; font.pixelSize: Theme.typography.titleMedium.size; font.family: Theme.typography.titleMedium.family; color: Theme.color.onSurfaceColor }
+                                LocalControls.CanvasLineChart {
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    labels: ["1", "2", "3", "4", "5", "6", "7", "8"]
+                                    series: [
+                                        { name: "A", values: [4, 7, 6, 10, 8, 12, 11, 15], color: "primary", showArea: true, showPoints: true },
+                                        { name: "B", values: [3, 6, 4, 8, 9, 10, 13, 12], color: "tertiary", showArea: false, showPoints: true }
+                                    ]
+                                }
+                            }
+                        }
+
+                        Card {
+                            type: "outlined"
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 240
+
+                            ColumnLayout {
+                                anchors.fill: parent
+                                anchors.margins: 16
+                                spacing: 12
+
+                                Text { text: "Bar"; font.pixelSize: Theme.typography.titleMedium.size; font.family: Theme.typography.titleMedium.family; color: Theme.color.onSurfaceColor }
+                                LocalControls.CanvasBarChart {
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+                                    series: [
+                                        { name: "2025", values: [12, 6, 9, 3, 11, 7, 10], color: "primary" },
+                                        { name: "2026", values: [10, 8, 7, 5, 9, 6, 12], color: "secondary" }
+                                    ]
+                                }
+                            }
+                        }
+
+                        Card {
+                            type: "outlined"
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 240
+
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.margins: 16
+                                spacing: 16
+
+                                ColumnLayout {
+                                    Layout.fillWidth: true
+                                    Layout.fillHeight: true
+                                    spacing: 12
+
+                                    Text { text: "Pie"; font.pixelSize: Theme.typography.titleMedium.size; font.family: Theme.typography.titleMedium.family; color: Theme.color.onSurfaceColor }
+                                    LocalControls.CanvasPieChart {
+                                        Layout.fillWidth: true
+                                        Layout.fillHeight: true
+                                        values: [30, 20, 15, 10, 25]
+                                        sliceColors: [Theme.color.primary, Theme.color.secondary, Theme.color.tertiary, Theme.color.error, Theme.color.outline]
+                                        innerRadiusRatio: 0.55
+                                        strokeWidth: 2
+                                    }
+                                }
+                            }
                         }
                     }
 
