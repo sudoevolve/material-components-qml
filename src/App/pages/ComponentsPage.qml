@@ -1,7 +1,6 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
-import "../../Core/Controls" as LocalControls
 import md3.Core
 
 Item {
@@ -1271,7 +1270,7 @@ Item {
                                 spacing: 12
 
                                 Text { text: "Line"; font.pixelSize: Theme.typography.titleMedium.size; font.family: Theme.typography.titleMedium.family; color: Theme.color.onSurfaceColor }
-                                LocalControls.CanvasLineChart {
+                                CanvasLineChart {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
                                     labels: ["1", "2", "3", "4", "5", "6", "7", "8"]
@@ -1294,7 +1293,7 @@ Item {
                                 spacing: 12
 
                                 Text { text: "Bar"; font.pixelSize: Theme.typography.titleMedium.size; font.family: Theme.typography.titleMedium.family; color: Theme.color.onSurfaceColor }
-                                LocalControls.CanvasBarChart {
+                                CanvasBarChart {
                                     Layout.fillWidth: true
                                     Layout.fillHeight: true
                                     labels: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
@@ -1322,7 +1321,7 @@ Item {
                                     spacing: 12
 
                                     Text { text: "Pie"; font.pixelSize: Theme.typography.titleMedium.size; font.family: Theme.typography.titleMedium.family; color: Theme.color.onSurfaceColor }
-                                    LocalControls.CanvasPieChart {
+                                    CanvasPieChart {
                                         Layout.fillWidth: true
                                         Layout.fillHeight: true
                                         values: [30, 20, 15, 10, 25]
