@@ -6,6 +6,11 @@ Item {
     width: parent.width
     height: parent.height
 
+    IndexBackground {
+        anchors.fill: parent
+        mouseTrackingEnabled: false
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: 48
@@ -218,5 +223,4 @@ Item {
         heroCarousel.model = urls
     }
 }
-
 

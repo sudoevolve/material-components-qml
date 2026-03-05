@@ -1038,6 +1038,38 @@ Item {
                     }
 
                     Text {
+                        text: "Index Background"
+                        font.pixelSize: Theme.typography.headlineSmall.size
+                        color: Theme.color.onSurfaceColor
+                        Layout.alignment: Qt.AlignHCenter
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.maximumWidth: 700
+                        Layout.preferredHeight: 340
+                        Layout.alignment: Qt.AlignHCenter
+                        radius: 16
+                        color: Theme.color.surfaceContainerLowest
+                        border.width: 1
+                        border.color: Theme.color.outlineVariant
+                        clip: true
+
+                        IndexBackground {
+                            anchors.fill: parent
+                            running: progressSwitch.checked
+                        }
+                    }
+
+                    Rectangle {
+                        Layout.fillWidth: true
+                        Layout.maximumWidth: 600
+                        Layout.alignment: Qt.AlignHCenter
+                        height: 1
+                        color: Theme.color.outlineVariant
+                    }
+
+                    Text {
                         text: "Cards"
                         font.pixelSize: Theme.typography.headlineSmall.size
                         color: Theme.color.onSurfaceColor
