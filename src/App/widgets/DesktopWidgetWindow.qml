@@ -24,6 +24,7 @@ Window {
     color: "transparent"
 
     property string widgetSource: ""
+    property var hotReloaderObj: (typeof HotReloader !== "undefined") ? HotReloader : null
     
     // Refresh window to apply flag changes
     onAlwaysOnTopChanged: {
@@ -51,7 +52,7 @@ Window {
     }
 
     Connections {
-        target: HotReloader
+        target: desktopWindow.hotReloaderObj
         function onFileChanged(path) {
             console.log("DesktopWidgetWindow: HotReloader signal received for:", path)
             console.log("DesktopWidgetWindow: Current widgetSource:", desktopWindow.widgetSource)
@@ -348,4 +349,3 @@ Window {
         z: 998 // Below the menu overlay
     }
 }
-

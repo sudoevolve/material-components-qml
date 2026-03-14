@@ -6,6 +6,7 @@ ColumnLayout {
     id: root
     
     property string folderPath: ExternalWidgetsPath
+    property var hotReloaderObj: (typeof HotReloader !== "undefined") ? HotReloader : null
     spacing: 16
     
     Text {
@@ -33,7 +34,7 @@ ColumnLayout {
         Layout.alignment: Qt.AlignHCenter
         
         Connections {
-            target: HotReloader
+            target: root.hotReloaderObj
             function onFileChanged(path) {
                 debugText.text = "Last change: " + path + " at " + new Date().toLocaleTimeString()
             }
@@ -140,7 +141,7 @@ ColumnLayout {
                 }
                 
                 Connections {
-                                target: HotReloader
+                                target: root.hotReloaderObj
                                 function onFileChanged(path) {
                                     var changed = path.replace(/\\/g, "/")
                                     var current = filePath.toString().replace("file:///", "").replace(/\\/g, "/")
@@ -200,10 +201,11 @@ ColumnLayout {
                 
                 Component.onCompleted: {
                      var path = filePath.toString().replace("file:///", "")
-                     HotReloader.watch(path)
+                     if (root.hotReloaderObj && root.hotReloaderObj.watch) {
+                         root.hotReloaderObj.watch(path)
+                     }
                 }
             }
         }
     }
 }
-

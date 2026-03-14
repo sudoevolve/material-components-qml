@@ -7,6 +7,57 @@ Item {
     id: root
     width: parent.width
     height: parent.height
+    property var appFeatures: (typeof AppFeatures !== "undefined" && AppFeatures) ? AppFeatures : ({})
+
+    function hasExtra(key) {
+        return !!appFeatures[key]
+    }
+
+    function appendTask(name, icon, page) {
+        tasksModel.append({ name: name, icon: icon, page: page })
+    }
+
+    function rebuildTasks() {
+        tasksModel.clear()
+
+        if (hasExtra("performance")) appendTask("Performance Monitor", "monitor_heart", "Performance")
+        if (hasExtra("dataGrid")) appendTask("Advanced DataGrid", "table_chart", "extras/DataGridPage.qml")
+        if (hasExtra("charts")) appendTask("Interactive Charts", "bar_chart", "extras/ChartsPage.qml")
+        if (hasExtra("hotReload")) appendTask("Hot Reload", "bolt", "extras/HotReloadPage.qml")
+        if (hasExtra("mathSymbols")) appendTask("Math Symbol Support", "functions", "extras/MathSymbolsPage.qml")
+        if (hasExtra("markdown")) appendTask("Rich Editors", "edit_note", "extras/MarkdownPage.qml")
+        if (hasExtra("nodeGraph")) appendTask("Node Graph Editor", "polyline", "extras/NodeGraphPage.qml")
+        if (hasExtra("gantt")) appendTask("Gantt & Scheduler", "calendar_month", "extras/GanttPage.qml")
+
+        appendTask("Report Designer", "print", "")
+        appendTask("3D Data Visualization", "view_in_ar", "")
+        appendTask("Scientific Image Analyzer", "image_search", "")
+        appendTask("Property & Parameter Tree", "account_tree", "")
+        appendTask("Industrial Gauge Kit", "speed", "")
+        appendTask("Advanced GIS Map", "map", "")
+        appendTask("Video Wall & Player", "videocam", "")
+        appendTask("Network Topology Diagram", "hub", "")
+    }
+
+    function togglePerformanceMonitor() {
+        var win = Window.window
+        if (!win || !win.contentItem) return
+
+        var stack = [win.contentItem]
+        while (stack.length > 0) {
+            var obj = stack.pop()
+            if (!obj) continue
+            if (obj.objectName === "GlobalPerformanceMonitor") {
+                obj.visible = !obj.visible
+                return
+            }
+            if (obj.children && obj.children.length) {
+                for (var i = 0; i < obj.children.length; ++i) stack.push(obj.children[i])
+            }
+        }
+    }
+
+    Component.onCompleted: rebuildTasks()
 
     AnimatedWindow {
         id: animatedWindow
@@ -31,25 +82,8 @@ Item {
         }
     }
 
-    // Model for tasks derived from task.md
     ListModel {
         id: tasksModel
-        ListElement { name: "Performance Monitor"; icon: "monitor_heart"; page: "" }
-        ListElement { name: "Advanced DataGrid"; icon: "table_chart"; page: "" }
-        ListElement { name: "Interactive Charts"; icon: "bar_chart"; page: "" }
-        ListElement { name: "Hot Reload"; icon: "bolt"; page: "" }
-        ListElement { name: "Math Symbol Support"; icon: "functions"; page: " " }
-        ListElement { name: "Rich Editors"; icon: "edit_note"; page: "" }
-        ListElement { name: "Node Graph Editor"; icon: "polyline"; page: "" }
-        ListElement { name: "Gantt & Scheduler"; icon: "calendar_month"; page: "" }
-        ListElement { name: "Report Designer"; icon: "print"; page: "" }
-        ListElement { name: "3D Data Visualization"; icon: "view_in_ar"; page: "" }
-        ListElement { name: "Scientific Image Analyzer"; icon: "image_search"; page: "" }
-        ListElement { name: "Property & Parameter Tree"; icon: "account_tree"; page: "" }
-        ListElement { name: "Industrial Gauge Kit"; icon: "speed"; page: "" }
-        ListElement { name: "Advanced GIS Map"; icon: "map"; page: "" }
-        ListElement { name: "Video Wall & Player"; icon: "videocam"; page: "" }
-        ListElement { name: "Network Topology Diagram"; icon: "hub"; page: "" }
     }
 
     // Dashboard View
@@ -161,17 +195,7 @@ Item {
                             cursorShape: Qt.PointingHandCursor
                             onClicked: {
                                 if (page === "Performance") {
-                                    var win = Window.window
-                                    if (win) {
-                                        // Find PerformanceMonitor in window children
-                                        for (var i = 0; i < win.contentItem.children.length; ++i) {
-                                            var child = win.contentItem.children[i]
-                                            if (child.toString().indexOf("PerformanceMonitor") !== -1) {
-                                                child.visible = !child.visible
-                                                break
-                                            }
-                                        }
-                                    }
+                                    root.togglePerformanceMonitor()
                                 } else if (page !== "") {
                                     pageLoader.source = page
                                     animatedWindow.open(cardDelegate)

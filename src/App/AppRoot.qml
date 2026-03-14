@@ -5,8 +5,21 @@ import md3.Core
 Item {
     id: root
     anchors.fill: parent
+    property var appFeatures: (typeof AppFeatures !== "undefined" && AppFeatures) ? AppFeatures : ({})
+    property bool hasPerformance: !!appFeatures.performance
+    property bool canHotReload: !!appFeatures.hotReload && HotReloadEnabled && ProjectSourceDir
 
     property var currentItem: navItems[0]
+
+    function playPageEnter(targetItem) {
+        if (!targetItem) return
+        enterAnim.stop()
+        animOpacity.target = targetItem
+        animY.target = targetItem
+        targetItem.opacity = 0
+        targetItem.y = 50
+        enterAnim.start()
+    }
 
     property var navItems: [
         { type: "item", text: "Home", icon: "home", page: "pages/HomePage.qml" },
@@ -61,47 +74,45 @@ Item {
                 anchors.fill: parent
 
                 Loader {
+                    id: pageHost
                     anchors.fill: parent
-                    sourceComponent: prodPageLoader
+                    sourceComponent: root.canHotReload ? devPageLoader : prodPageLoader
                 }
 
                 Component {
                     id: prodPageLoader
-
                     Loader {
                         id: pageLoader
                         anchors.fill: parent
                         source: root.currentItem ? root.currentItem.page : ""
 
                         onLoaded: {
-                            if (item) {
-                                enterAnim.stop()
-                                animOpacity.target = item
-                                animY.target = item
-                                item.opacity = 0
-                                item.y = 50
-                                enterAnim.start()
-                            }
+                            root.playPageEnter(item)
                         }
                     }
                 }
 
                 Component {
                     id: devPageLoader
-
                     Loader {
-                        id: pageLoader
+                        id: devHotReloadLoader
                         anchors.fill: parent
-                        source: ProjectSourceDir + "/src/App/" + (root.currentItem ? root.currentItem.page : "")
-
+                        source: "qrc:/qt/qml/md3/Extras/HotReload/HotReloadLoader.qml"
                         onLoaded: {
-                            if (item) {
-                                enterAnim.stop()
-                                animOpacity.target = item
-                                animY.target = item
-                                item.opacity = 0
-                                item.y = 50
-                                enterAnim.start()
+                            if (!item) return
+                            item.sourcePath = Qt.binding(function() {
+                                return ProjectSourceDir + "/src/App/" + (root.currentItem ? root.currentItem.page : "")
+                            })
+                            item.reloadOnAnyChange = true
+                        }
+
+                        Connections {
+                            target: devHotReloadLoader.item
+                            ignoreUnknownSignals: true
+                            function onLoaded() {
+                                var hotLoader = devHotReloadLoader.item
+                                if (!hotLoader || !hotLoader.hasOwnProperty("item")) return
+                                root.playPageEnter(hotLoader["item"])
                             }
                         }
                     }
@@ -116,4 +127,16 @@ Item {
         }
     }
 
+    Loader {
+        id: globalPerfMonitorLoader
+        active: root.hasPerformance
+        source: "qrc:/qt/qml/md3/Extras/Performance/PerformanceMonitor.qml"
+        onLoaded: {
+            if (!item) return
+            item.objectName = "GlobalPerformanceMonitor"
+            item.floatingAlignment = Qt.AlignTop | Qt.AlignLeft
+            item.visible = false
+            item.z = 1000000
+        }
+    }
 }

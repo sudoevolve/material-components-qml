@@ -13,6 +13,7 @@ Item {
     property string trailingIcon: "arrow_drop_down"
     property string type: "filled" // "filled" | "outlined"
     property bool enabled: true
+    property color labelBackgroundColor: Theme.color.background
     
     // Read-only
     property string currentText: {
@@ -171,7 +172,7 @@ Item {
             // Background for Outlined Label (to hide border)
             Rectangle {
                 visible: control.type === "outlined" && control._actuallyFloated
-                color: _colors.background // Match window background
+                color: control.labelBackgroundColor
                 z: -1
                 anchors.fill: parent
                 anchors.leftMargin: -4
@@ -222,4 +223,3 @@ Item {
         onClosed: control.menuOpen = false
     }
 }
-

@@ -223,7 +223,7 @@ Item {
                         if (itemData.action && typeof itemData.action === "function") {
                             itemData.action()
                         }
-                        overlayLayer.close()
+                        if (control && control.close) control.close()
                     }
                 }
             }
@@ -361,4 +361,3 @@ Item {
         overlayLayer.close()
     }
 }
-

@@ -146,9 +146,27 @@ Item {
                 horizontalAlignment: Text.AlignHCenter
                 Layout.alignment: Qt.AlignHCenter
             }
+
+            Text {
+                text: "Pro License (src/Extras)"
+                font.family: Theme.typography.titleSmall.family
+                font.pixelSize: Theme.typography.titleSmall.size
+                color: Theme.color.onSurfaceColor
+                Layout.alignment: Qt.AlignHCenter
+                Layout.topMargin: 16
+            }
+
+            Text {
+                text: "The extended components under src/Extras are part of the Pro feature set.\nWithout a Pro commercial license, they are intended for evaluation/learning only and must not be used for commercial release.\nFor use in commercial products, please obtain the appropriate license authorization first."
+                font.family: Theme.typography.bodySmall.family
+                font.pixelSize: Theme.typography.bodySmall.size
+                color: Theme.color.onSurfaceVariantColor
+                horizontalAlignment: Text.AlignHCenter
+                Layout.alignment: Qt.AlignHCenter
+                wrapMode: Text.WordWrap
+                Layout.maximumWidth: 520
+            }
         }
     }
 }
-
-
 

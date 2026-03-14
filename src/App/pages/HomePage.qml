@@ -223,4 +223,3 @@ Item {
         heroCarousel.model = urls
     }
 }
-
