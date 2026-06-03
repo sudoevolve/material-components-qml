@@ -17,7 +17,7 @@ Item {
             
             Image { 
                 id: sourceItem 
-                source: "https://avatars.githubusercontent.com/u/46568635?v=4" 
+                source: "https://avatars.githubusercontent.com/u/147291183?s=240&v=4" 
                 anchors.centerIn: parent 
                 width: parent.width 
                 height: parent.height 
@@ -169,4 +169,3 @@ Item {
         }
     }
 }
-
