@@ -14,6 +14,8 @@ foreach(_opt IN ITEMS
     MD3_HAS_EXTRA_MARKDOWN
     MD3_HAS_EXTRA_NODEGRAPH
     MD3_HAS_EXTRA_GANTT
+    MD3_HAS_EXTRA_REPORTDESIGNER
+    MD3_HAS_EXTRA_VIDEOWALL
 )
     if(NOT DEFINED ${_opt})
         set(${_opt} FALSE)
@@ -55,6 +57,14 @@ if(NOT MD3_HAS_EXTRA_GANTT)
     md3_remove_app_qml("pages/extras/GanttPage.qml")
 endif()
 
+if(NOT MD3_HAS_EXTRA_REPORTDESIGNER)
+    md3_remove_app_qml("pages/extras/ReportDesignerPage.qml")
+endif()
+
+if(NOT MD3_HAS_EXTRA_VIDEOWALL)
+    md3_remove_app_qml("pages/extras/VideoWallPage.qml")
+endif()
+
 qt_add_executable(appmd3
     MANUAL_FINALIZATION
     main.cpp
@@ -70,6 +80,8 @@ target_compile_definitions(appmd3 PRIVATE
     MD3_HAS_EXTRA_MARKDOWN=$<BOOL:${MD3_HAS_EXTRA_MARKDOWN}>
     MD3_HAS_EXTRA_NODEGRAPH=$<BOOL:${MD3_HAS_EXTRA_NODEGRAPH}>
     MD3_HAS_EXTRA_GANTT=$<BOOL:${MD3_HAS_EXTRA_GANTT}>
+    MD3_HAS_EXTRA_REPORTDESIGNER=$<BOOL:${MD3_HAS_EXTRA_REPORTDESIGNER}>
+    MD3_HAS_EXTRA_VIDEOWALL=$<BOOL:${MD3_HAS_EXTRA_VIDEOWALL}>
 )
 
 if(WIN32)
@@ -95,6 +107,10 @@ set_target_properties(appmd3 PROPERTIES
     MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
     MACOSX_BUNDLE TRUE
     WIN32_EXECUTABLE TRUE
+    QT_ANDROID_TARGET_SDK_VERSION 31
+    QT_ANDROID_MIN_SDK_VERSION 23
+    QT_ANDROID_BUILD_ALL_ABIS ON
+    QT_ANDROID_SYSTEM_LIBS_PREFIX "lib"
 )
 
 target_link_libraries(appmd3
@@ -127,6 +143,12 @@ endif()
 if(MD3_HAS_EXTRA_GANTT)
     list(APPEND MD3_APP_EXTRA_TARGETS md3ExtrasGantt)
 endif()
+if(MD3_HAS_EXTRA_REPORTDESIGNER)
+    list(APPEND MD3_APP_EXTRA_TARGETS md3ExtrasReportDesigner)
+endif()
+if(MD3_HAS_EXTRA_VIDEOWALL)
+    list(APPEND MD3_APP_EXTRA_TARGETS md3ExtrasVideoWall)
+endif()
 
 if(MSVC)
     target_link_libraries(appmd3
@@ -148,6 +170,17 @@ elseif(MINGW OR (UNIX AND NOT APPLE))
             ${MD3_APP_EXTRA_TARGETS}
             -Wl,--no-whole-archive
     )
+elseif(APPLE)
+    target_link_libraries(appmd3
+        PRIVATE
+            md3Core
+            ${MD3_APP_EXTRA_TARGETS}
+    )
+
+    set(MD3_APP_FORCE_LOAD_TARGETS md3Core ${MD3_APP_EXTRA_TARGETS})
+    foreach(_target IN LISTS MD3_APP_FORCE_LOAD_TARGETS)
+        target_link_options(appmd3 PRIVATE "LINKER:SHELL:-force_load $<TARGET_FILE:${_target}>")
+    endforeach()
 else()
     target_link_libraries(appmd3
         PRIVATE

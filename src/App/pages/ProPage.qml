@@ -28,14 +28,14 @@ Item {
         if (hasExtra("markdown")) appendTask("Rich Editors", "edit_note", "extras/MarkdownPage.qml")
         if (hasExtra("nodeGraph")) appendTask("Node Graph Editor", "polyline", "extras/NodeGraphPage.qml")
         if (hasExtra("gantt")) appendTask("Gantt & Scheduler", "calendar_month", "extras/GanttPage.qml")
+        if (hasExtra("reportDesigner")) appendTask("Report Designer Studio", "print", "extras/ReportDesignerPage.qml")
+        if (hasExtra("videoWall")) appendTask("Video Wall", "videocam", "extras/VideoWallPage.qml")
 
-        appendTask("Report Designer", "print", "")
         appendTask("3D Data Visualization", "view_in_ar", "")
         appendTask("Scientific Image Analyzer", "image_search", "")
         appendTask("Property & Parameter Tree", "account_tree", "")
         appendTask("Industrial Gauge Kit", "speed", "")
         appendTask("Advanced GIS Map", "map", "")
-        appendTask("Video Wall & Player", "videocam", "")
         appendTask("Network Topology Diagram", "hub", "")
     }
 

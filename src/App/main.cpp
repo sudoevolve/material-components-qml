@@ -39,6 +39,12 @@
 #ifndef MD3_HAS_EXTRA_GANTT
 #define MD3_HAS_EXTRA_GANTT 0
 #endif
+#ifndef MD3_HAS_EXTRA_REPORTDESIGNER
+#define MD3_HAS_EXTRA_REPORTDESIGNER 0
+#endif
+#ifndef MD3_HAS_EXTRA_VIDEOWALL
+#define MD3_HAS_EXTRA_VIDEOWALL 0
+#endif
 
 #if MD3_HAS_EXTRA_HOTRELOAD
 #include "hotreloader.h"
@@ -55,6 +61,8 @@ static QVariantMap buildAppFeatures()
     features.insert(QStringLiteral("markdown"), MD3_HAS_EXTRA_MARKDOWN != 0);
     features.insert(QStringLiteral("nodeGraph"), MD3_HAS_EXTRA_NODEGRAPH != 0);
     features.insert(QStringLiteral("gantt"), MD3_HAS_EXTRA_GANTT != 0);
+    features.insert(QStringLiteral("reportDesigner"), MD3_HAS_EXTRA_REPORTDESIGNER != 0);
+    features.insert(QStringLiteral("videoWall"), MD3_HAS_EXTRA_VIDEOWALL != 0);
     return features;
 }
 
@@ -82,7 +90,9 @@ int main(int argc, char *argv[])
 
 #if MD3_HAS_EXTRA_HOTRELOAD
     const bool hotReloadEnabled =
-#ifdef QT_DEBUG
+#if defined(Q_OS_ANDROID) || defined(Q_OS_IOS)
+        false;
+#elif defined(QT_DEBUG)
         true;
 #else
         false;

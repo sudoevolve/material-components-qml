@@ -6,7 +6,7 @@ Window {
     width: 1280
     height: 800
     visible: true
-    title: "MD3 qml Components"
+    title: "MD3 qml Components Pro"
     color: Theme.color.background
     property var appFeatures: (typeof AppFeatures !== "undefined" && AppFeatures) ? AppFeatures : ({})
     property bool canHotReload: !!appFeatures.hotReload && HotReloadEnabled && ProjectSourceDir

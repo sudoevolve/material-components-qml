@@ -22,6 +22,7 @@ Item {
     property int maxSampleCount: 120
     property real trendYMax: 16
     property bool scrollWhenNoData: false
+    property bool rxHexMode: false
 
     function isMockBackend() { return root.backendType === root.backendMock }
     function isSerialBackend() { return root.backendType === root.backendSerial }
@@ -228,7 +229,15 @@ Item {
     }
 
     function handleTextRx(prefix, text) {
+        if (root.rxHexMode || text.length === 0) return
         let cleaned = text
+        if (cleaned.length > 220) cleaned = cleaned.slice(0, 220) + "..."
+        appendLog(prefix, cleaned)
+    }
+
+    function handleHexRx(prefix, hexText) {
+        if (!root.rxHexMode || hexText.length === 0) return
+        let cleaned = hexText
         if (cleaned.length > 220) cleaned = cleaned.slice(0, 220) + "..."
         appendLog(prefix, cleaned)
     }
@@ -302,6 +311,7 @@ Item {
         function onOpened() { if (root.backendType === root.backendSerial) root.appendLog("SYS", "Serial opened: " + serialBackend.portName) }
         function onClosed() { if (root.backendType === root.backendSerial) root.appendLog("SYS", "Serial closed") }
         function onTextReceived(text) { if (root.backendType === root.backendSerial) root.handleTextRx("RX", text) }
+        function onHexReceived(hexText) { if (root.backendType === root.backendSerial) root.handleHexRx("RX", hexText) }
         function onSerialErrorOccurred(code, message) { if (root.backendType === root.backendSerial) root.handleError("ERR", code, message) }
     }
 
@@ -310,6 +320,7 @@ Item {
         function onOpened() { if (root.backendType === root.backendMock) root.appendLog("SYS", "Mock opened: " + mockBackend.portName) }
         function onClosed() { if (root.backendType === root.backendMock) root.appendLog("SYS", "Mock closed") }
         function onTextReceived(text) { if (root.backendType === root.backendMock) root.handleTextRx("RX", text) }
+        function onHexReceived(hexText) { if (root.backendType === root.backendMock) root.handleHexRx("RX", hexText) }
         function onSerialErrorOccurred(code, message) { if (root.backendType === root.backendMock) root.handleError("ERR", code, message) }
     }
 
@@ -318,6 +329,7 @@ Item {
         function onOpened() { if (root.backendType === root.backendTcp) root.appendLog("SYS", "TCP connected: " + tcpBackend.host + ":" + tcpBackend.port) }
         function onClosed() { if (root.backendType === root.backendTcp) root.appendLog("SYS", "TCP disconnected") }
         function onTextReceived(text) { if (root.backendType === root.backendTcp) root.handleTextRx("RX", text) }
+        function onHexReceived(hexText) { if (root.backendType === root.backendTcp) root.handleHexRx("RX", hexText) }
         function onSerialErrorOccurred(code, message) { if (root.backendType === root.backendTcp) root.handleError("ERR", code, message) }
     }
 
@@ -326,6 +338,7 @@ Item {
         function onOpened() { if (root.backendType === root.backendWebSocket) root.appendLog("SYS", "WebSocket connected: " + wsBackend.url) }
         function onClosed() { if (root.backendType === root.backendWebSocket) root.appendLog("SYS", "WebSocket disconnected") }
         function onTextReceived(text) { if (root.backendType === root.backendWebSocket) root.handleTextRx("RX", text) }
+        function onHexReceived(hexText) { if (root.backendType === root.backendWebSocket) root.handleHexRx("RX", hexText) }
         function onSerialErrorOccurred(code, message) { if (root.backendType === root.backendWebSocket) root.handleError("ERR", code, message) }
     }
 
@@ -527,6 +540,15 @@ Item {
                 }
 
                 Switch {
+                    text: "RX HEX"
+                    checked: root.rxHexMode
+                    onClicked: {
+                        root.rxHexMode = !root.rxHexMode
+                        root.appendLog("SYS", "RX view: " + (root.rxHexMode ? "HEX" : "TEXT"))
+                    }
+                }
+
+                Switch {
                     text: "Idle Scroll"
                     checked: root.scrollWhenNoData
                     onClicked: root.scrollWhenNoData = !root.scrollWhenNoData
@@ -551,6 +573,7 @@ Item {
                 text: "Backend: " + root.backendName()
                       + " | endpoint=" + root.endpointSummary()
                       + " | open=" + activeBackend().isOpen
+                      + " | rxView=" + (root.rxHexMode ? "HEX" : "TEXT")
                       + " | sent=" + activeBackend().bytesSent + "B"
                       + " | recv=" + activeBackend().bytesReceived + "B"
                       + (activeBackend().errorString.length > 0 ? (" | err=" + activeBackend().errorString) : "")
