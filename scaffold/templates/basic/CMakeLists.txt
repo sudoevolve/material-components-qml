@@ -188,12 +188,48 @@ target_compile_definitions({{PROJECT_ID}}App
         PROJECT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}"
 )
 
-target_link_libraries({{PROJECT_ID}}App
-    PRIVATE
-        Qt6::Quick
-        md3Core
-        ${MD3_EXTRA_TARGETS}
-)
+if(MSVC)
+    target_link_libraries({{PROJECT_ID}}App
+        PRIVATE
+            Qt6::Quick
+            md3Core
+            ${MD3_EXTRA_TARGETS}
+    )
+
+    set(MD3_WHOLEARCHIVE_OPTIONS /WHOLEARCHIVE:md3Core)
+    foreach(_target IN LISTS MD3_EXTRA_TARGETS)
+        list(APPEND MD3_WHOLEARCHIVE_OPTIONS "/WHOLEARCHIVE:${_target}")
+    endforeach()
+    target_link_options({{PROJECT_ID}}App PRIVATE ${MD3_WHOLEARCHIVE_OPTIONS})
+elseif(MINGW OR (UNIX AND NOT APPLE))
+    target_link_libraries({{PROJECT_ID}}App
+        PRIVATE
+            Qt6::Quick
+            -Wl,--whole-archive
+            md3Core
+            ${MD3_EXTRA_TARGETS}
+            -Wl,--no-whole-archive
+    )
+elseif(APPLE)
+    target_link_libraries({{PROJECT_ID}}App
+        PRIVATE
+            Qt6::Quick
+            md3Core
+            ${MD3_EXTRA_TARGETS}
+    )
+
+    set(MD3_FORCE_LOAD_TARGETS md3Core ${MD3_EXTRA_TARGETS})
+    foreach(_target IN LISTS MD3_FORCE_LOAD_TARGETS)
+        target_link_options({{PROJECT_ID}}App PRIVATE "LINKER:SHELL:-force_load $<TARGET_FILE:${_target}>")
+    endforeach()
+else()
+    target_link_libraries({{PROJECT_ID}}App
+        PRIVATE
+            Qt6::Quick
+            md3Core
+            ${MD3_EXTRA_TARGETS}
+    )
+endif()
 
 qt_import_qml_plugins({{PROJECT_ID}}App)
 qt_finalize_executable({{PROJECT_ID}}App)

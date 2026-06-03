@@ -67,8 +67,7 @@ Buy / Learn more:
 
 - `src/Core/`: QML module `md3.Core` (components + Theme system) + C++ backend (`md3Core`).
 - `src/App/`: Gallery app `md3.App` (demo pages + desktop widgets) + executable `appmd3`.
-- `scaffold/`: PowerShell project scaffold (templates + `New-MD3Project.ps1`).
-- `docs/`: Product pages and roadmap (including MD3 Pro roadmap).
+- `scaffold/`: Python project scaffold (`create_project.py` + templates).
 
 ## Build & Run
 
@@ -106,18 +105,41 @@ The recommended way is to vendor MD3 as source and build `md3Core` together with
 
 ### Option: Source Integration (Recommended)
 
-Add MD3 Core to your project:
+Add MD3 Core to your project. Because `md3Core` is a static QML module, keep the archive loaded into your final executable so the embedded QML resources and singleton registrations are retained:
 
 ```cmake
 set(MD3_SOURCE_DIR "path/to/md3")
 
 add_subdirectory("${MD3_SOURCE_DIR}/src/Core" md3Core_build)
 
-target_link_libraries(your_app
-    PRIVATE
-        Qt6::Quick
-        md3Core
-)
+if(MSVC)
+    target_link_libraries(your_app PRIVATE Qt6::Quick md3Core)
+    target_link_options(your_app PRIVATE /WHOLEARCHIVE:md3Core)
+elseif(MINGW OR (UNIX AND NOT APPLE))
+    target_link_libraries(your_app
+        PRIVATE
+            Qt6::Quick
+            -Wl,--whole-archive
+            md3Core
+            -Wl,--no-whole-archive
+    )
+elseif(APPLE)
+    target_link_libraries(your_app PRIVATE Qt6::Quick md3Core)
+    target_link_options(your_app PRIVATE "LINKER:SHELL:-force_load $<TARGET_FILE:md3Core>")
+else()
+    target_link_libraries(your_app PRIVATE Qt6::Quick md3Core)
+endif()
+
+qt_import_qml_plugins(your_app)
+qt_finalize_executable(your_app)
+```
+
+When loading QML from C++, include Qt's resource import path before `loadFromModule()`:
+
+```cpp
+QQmlApplicationEngine engine;
+engine.addImportPath("qrc:/qt/qml");
+engine.loadFromModule("your.module", "Main");
 ```
 
 ### QML Usage
