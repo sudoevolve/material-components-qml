@@ -16,6 +16,8 @@ target_sources(md3Core
     PRIVATE
         Cpp/stylemanager.cpp
         Cpp/stylemanager.h
+        Cpp/colorhelper.cpp
+        Cpp/colorhelper.h
 )
 
 qt_add_qml_module(md3Core
