@@ -166,7 +166,7 @@ Item {
                     
                     // Background for Outlined Label (to hide border behind label)
                     Rectangle {
-                        visible: type === "outlined" && control.isFloating
+                        visible: type === "outlined" && control.isFloating && control.label !== ""
                         color: control.labelBackgroundColor // Use specified background color to mask border
                         anchors.fill: parent
                         anchors.margins: -4

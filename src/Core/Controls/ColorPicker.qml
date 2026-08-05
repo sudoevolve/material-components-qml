@@ -6,12 +6,36 @@ ColumnLayout {
     id: root
     spacing: 16
 
+    property bool asSeedColor: true // For compability
+    property bool hasAlpha: false   // Also for compability
+    property string title: ""
+    property string hueText: "Hue"
+    property string chromaText: "Chroma"
+    property string toneText: "Tone"
+    property string alphaText: "Alpha"
+    property color selectedColor: StyleManager.seedColor
+
+    Connections {
+        target: StyleManager
+        enabled: root.asSeedColor
+        function onSeedColorChanged() {
+            root.selectedColor = StyleManager.seedColor;
+        }
+    }
+
+    onSelectedColorChanged: {
+        hueSlider.value = ColorHelper.hue(selectedColor);
+        chromaSlider.value = ColorHelper.chroma(selectedColor);
+        toneSlider.value = ColorHelper.tone(selectedColor);
+        alphaSlider.value = selectedColor.a;
+    }
+
     // Header
     Text {
-        text: "Theme Controls"
-        font.pixelSize: Theme.typography.headlineSmall.size
+        visible: title !== ""
+        text: title
+        font.pixelSize: Theme.typography.titleMedium.size
         color: Theme.color.onSurfaceColor
-        font.weight: Font.Bold
         Layout.alignment: Qt.AlignLeft
     }
 
@@ -28,32 +52,24 @@ ColumnLayout {
             anchors.margins: 16
             spacing: 16
 
-            // Hex Source Color
-            RowLayout {
+            // Color hex + preview rectangle
+            Rectangle {
                 Layout.fillWidth: true
-                spacing: 16
+                height: 48; radius: 24
+                color: selectedColor
 
                 Text {
-                    text: "Hex Source Color"
-                    font.pixelSize: Theme.typography.bodyLarge.size
-                    color: Theme.color.onSurfaceColor
-                    Layout.fillWidth: true
-                }
-
-                Rectangle {
-                    width: 48
-                    height: 48
-                    radius: 24
-                    color: StyleManager.seedColor
-                    border.width: 1
-                    border.color: Theme.color.outline
+                    anchors.centerIn: parent
+                    text: hasAlpha ? ColorHelper.ahex(root.selectedColor) : ColorHelper.hex(root.selectedColor)
+                    font.pixelSize: Theme.typography.titleLarge.size
+                    color: (0.299 * root.selectedColor.r + 0.587 * root.selectedColor.g + 0.114 * root.selectedColor.b) > 0.5 ? "black" : "white"
                 }
             }
 
             // Helper to update seed color
             function updateSeed() {
-                // Use HCT directly via StyleManager
-                StyleManager.setSeedColorHct(hueSlider.value, chromaSlider.value, toneSlider.value)
+                // Set seed color via StyleManager
+                StyleManager.seedColor = selectedColor;
             }
 
             // Hue
@@ -62,22 +78,30 @@ ColumnLayout {
                 spacing: 4
                 RowLayout {
                     Layout.fillWidth: true
-                    Text { text: "Hue"; color: Theme.color.onSurfaceColor; font.pixelSize: Theme.typography.bodyMedium.size }
+                    Text {
+                        text: hueText
+                        color: Theme.color.onSurfaceColor
+                        font.pixelSize: Theme.typography.bodyMedium.size
+                    }
                     Item { Layout.fillWidth: true }
-                    Text { 
+                    Text {
                         text: Math.round(hueSlider.value)
                         color: Theme.color.onSurfaceVariantColor
-                        font.pixelSize: Theme.typography.bodyMedium.size 
+                        font.pixelSize: Theme.typography.bodyMedium.size
                     }
                 }
-                
+
                 Slider {
                     id: hueSlider
                     Layout.fillWidth: true
                     from: 0; to: 360
                     // Break binding when dragging to avoid jitter/loops
-                    value: pressed ? value : StyleManager.hctHue
-                    onMoved: contentCol.updateSeed()
+                    value: pressed ? value : ColorHelper.hue(root.selectedColor)
+                    onMoved: {
+                        selectedColor = ColorHelper.hct2QColor(hueSlider.value, chromaSlider.value, toneSlider.value);
+                        if (root.asSeedColor)
+                            contentCol.updateSeed();
+                    }
                 }
                 
                 // Rainbow Gradient
@@ -102,12 +126,16 @@ ColumnLayout {
                 spacing: 4
                 RowLayout {
                     Layout.fillWidth: true
-                    Text { text: "Chroma"; color: Theme.color.onSurfaceColor; font.pixelSize: Theme.typography.bodyMedium.size }
+                    Text {
+                        text: chromaText
+                        color: Theme.color.onSurfaceColor
+                        font.pixelSize: Theme.typography.bodyMedium.size
+                    }
                     Item { Layout.fillWidth: true }
-                    Text { 
+                    Text {
                         text: Math.round(chromaSlider.value)
                         color: Theme.color.onSurfaceVariantColor
-                        font.pixelSize: Theme.typography.bodyMedium.size 
+                        font.pixelSize: Theme.typography.bodyMedium.size
                     }
                 }
                 
@@ -115,10 +143,14 @@ ColumnLayout {
                     id: chromaSlider
                     Layout.fillWidth: true
                     from: 0; to: 150
-                    value: pressed ? value : StyleManager.hctChroma
-                    onMoved: contentCol.updateSeed()
+                    value: pressed ? value : ColorHelper.chroma(root.selectedColor)
+                    onMoved: {
+                        selectedColor = ColorHelper.hct2QColor(hueSlider.value, chromaSlider.value, toneSlider.value);
+                        if (root.asSeedColor)
+                            contentCol.updateSeed();
+                    }
                 }
-                
+
                 // Saturation Gradient
                 Rectangle {
                     Layout.fillWidth: true; height: 8; radius: 4
@@ -136,30 +168,79 @@ ColumnLayout {
                 spacing: 4
                 RowLayout {
                     Layout.fillWidth: true
-                    Text { text: "Tone"; color: Theme.color.onSurfaceColor; font.pixelSize: Theme.typography.bodyMedium.size }
+                    Text {
+                        text: toneText
+                        color: Theme.color.onSurfaceColor
+                        font.pixelSize: Theme.typography.bodyMedium.size
+                    }
                     Item { Layout.fillWidth: true }
-                    Text { 
+                    Text {
                         text: Math.round(toneSlider.value)
                         color: Theme.color.onSurfaceVariantColor
-                        font.pixelSize: Theme.typography.bodyMedium.size 
+                        font.pixelSize: Theme.typography.bodyMedium.size
                     }
                 }
-                
+
                 Slider {
                     id: toneSlider
                     Layout.fillWidth: true
                     from: 0; to: 100
-                    value: pressed ? value : StyleManager.hctTone
-                    onMoved: contentCol.updateSeed()
+                    value: pressed ? value : ColorHelper.tone(root.selectedColor)
+                    onMoved: {
+                        selectedColor = ColorHelper.hct2QColor(hueSlider.value, chromaSlider.value, toneSlider.value);
+                        if (root.asSeedColor)
+                            contentCol.updateSeed();
+                    }
                 }
-                
+
                 // Value Gradient
                 Rectangle {
-                    Layout.fillWidth: true; height: 8; radius: 4
+                    Layout.fillWidth: true
+                    height: 8; radius: 4
                     gradient: Gradient {
                         orientation: Gradient.Horizontal
                         GradientStop { position: 0.0; color: "black" }
                         GradientStop { position: 1.0; color: "white" }
+                    }
+                }
+            }
+
+            // Alpha
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: 4
+                visible: root.hasAlpha
+                RowLayout {
+                    Layout.fillWidth: true
+                    Text {
+                        text: root.alphaText
+                        color: Theme.color.onSurfaceColor
+                        font.pixelSize: Theme.typography.bodyMedium.size
+                    }
+                    Item { Layout.fillWidth: true }
+                    Text {
+                        text: (alphaSlider.value * 100).toFixed(1) + "%"
+                        color: Theme.color.onSurfaceVariantColor
+                        font.pixelSize: Theme.typography.bodyMedium.size
+                    }
+                }
+
+                Slider {
+                    id: alphaSlider
+                    Layout.fillWidth: true
+                    from: 0; to: 1
+                    value: pressed ? value : root.selectedColor.a
+                    onMoved: selectedColor.a = value
+                }
+
+                // Value Gradient
+                Rectangle {
+                    Layout.fillWidth: true
+                    height: 8; radius: 4
+                    gradient: Gradient {
+                        orientation: Gradient.Horizontal
+                        GradientStop { position: 0.0; color: Qt.rgba(selectedColor.r, selectedColor.g, selectedColor.b, 1) }
+                        GradientStop { position: 1.0; color: "transparent" }
                     }
                 }
             }

@@ -119,6 +119,10 @@ Item {
         ColorPicker {
             Layout.fillWidth: true
             Layout.maximumWidth: 400
+            asSeedColor: true
+            hasAlpha: false
+            title: "Theme Control"
+            selectedColor: StyleManager.seedColor
         }
 
         Text {
@@ -168,6 +172,3 @@ Item {
         }
     }
 }
-
-
-
