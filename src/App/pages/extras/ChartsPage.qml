@@ -17,6 +17,7 @@ Item {
 
     property int lineExampleIndex: 0
     property int barExampleIndex: 0
+    property int chartSamples: 0
 
     function _makeLineExampleButtons(selectedIndex) {
         return [
@@ -131,6 +132,20 @@ Item {
                 color: Theme.color.onSurfaceColor
             }
             
+            Text {
+                text: "Antialiasing"
+                color: Theme.color.onSurfaceVariantColor
+                Layout.alignment: Qt.AlignVCenter
+            }
+
+            ComboBox {
+                Layout.preferredWidth: 112
+                Layout.preferredHeight: 40
+                model: ["Off", "2×", "4×"]
+                currentIndex: root.chartSamples === 2 ? 1 : (root.chartSamples === 4 ? 2 : 0)
+                onActivated: (index) => root.chartSamples = [0, 2, 4][index]
+            }
+
             Item { Layout.fillWidth: true }
         }
 
@@ -140,6 +155,8 @@ Item {
             contentWidth: width
             contentHeight: contentLayout.implicitHeight
             clip: true
+            layer.enabled: root.chartSamples > 0
+            layer.samples: root.chartSamples
             
             ColumnLayout {
                 id: contentLayout

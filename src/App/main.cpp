@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 {
     // Set default surface format for antialiasing (MSAA 4x)
     QSurfaceFormat format;
-    format.setSamples(4);
+    format.setSamples(0);
     QSurfaceFormat::setDefaultFormat(format);
 
     QGuiApplication app(argc, argv);

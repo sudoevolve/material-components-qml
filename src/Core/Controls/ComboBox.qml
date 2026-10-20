@@ -189,7 +189,7 @@ Item {
             anchors.right: trailingIconDisplay.left
             anchors.rightMargin: 16
             anchors.verticalCenter: parent.verticalCenter
-            anchors.verticalCenterOffset: (control.type === "filled" && control._actuallyFloated) ? 8 : 0 
+            anchors.verticalCenterOffset: (control.type === "filled" && control.label.length > 0 && control._actuallyFloated) ? 8 : 0
             
             text: control.currentText
             font.family: _typography.bodyLarge.family
